@@ -4,15 +4,18 @@ on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build for Node ${{ matrix.node }}
+    # This job will run multiple times — once per matrix entry
+    name: Build for Node.js ${{ matrix.node }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node: [14, 16, 18]  # 3 different variants
+        node: [14, 16, 18]  # ✅ 3 matrix variants
+      fail-fast: false       # Let all jobs complete even if one fails
 
     steps:
       - name: Checkout repository
@@ -23,18 +26,19 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # Step identifier for validation
+      # ✅ Step with identifier required for validation
       - name: matrix-aa7c2cf
         run: echo "Building for Node.js version ${{ matrix.node }}"
 
+      # ✅ Generate a non-empty artifact
       - name: Generate build artifact
         run: |
           echo "Build output for Node.js version ${{ matrix.node }}" > output-${{ matrix.node }}.txt
           echo "Timestamp: $(date)" >> output-${{ matrix.node }}.txt
-          echo "System Info:" >> output-${{ matrix.node }}.txt
+          echo "Node version info:" >> output-${{ matrix.node }}.txt
           node -v >> output-${{ matrix.node }}.txt
-          echo "Artifact successfully created."
 
+      # ✅ Upload with correct naming prefix
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
